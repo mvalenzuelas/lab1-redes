@@ -1,6 +1,7 @@
 import scipy.io.wavfile as waves
 import scipy.fft
 from scipy import signal
+from scipy.io import wavfile
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -70,15 +71,23 @@ def analizar(vector_audio,frecuencia_muestreo):
     plt.xlabel("Tiempo")
     plt.ylabel("Freceuncia")
     plt.show()
-
+ 
 
 if __name__ == '__main__':
     audio0, frecuencia_muestreo0=leer_audio("audio Hector.wav")
-    audio1,frecuencia_muestreo1=leer_audio("audio Maximiliano.wav")
-    audio2,frecuencia_muestreo2=leer_audio("Ruido Azul.wav")
+    audio1, frecuencia_muestreo1=leer_audio("audio Maximiliano.wav")
+    audio2, frecuencia_muestreo2=leer_audio("Ruido Azul.wav")
 
-    analizar(audio0,frecuencia_muestreo0)
-    analizar(audio1,frecuencia_muestreo1)
-    analizar(audio2,frecuencia_muestreo2)
+    #analizar(audio0,frecuencia_muestreo0)
+    #analizar(audio1,frecuencia_muestreo1)
+    #analizar(audio2,frecuencia_muestreo2)
+
+    audioRosa, frecuencia_ruido=leer_audio("Ruido Rosa.wav")
+    audio1 = signal.resample(audio1,len(audioRosa))
+    # Se suman las dos señales
+    dataResult = audio1+audioRosa
+    print(dataResult)
+    wavfile.write('audioRuidoso.wav',frecuencia_ruido,dataResult.astype(np.int16))
+    
 
 
