@@ -73,6 +73,16 @@ def analizar(vector_audio,frecuencia_muestreo):
     plt.show()
  
 
+def ruidoFilted(frecuencia_ruido, data):
+    wn1 = 2*500/frecuencia_ruido
+    wn2 = 2*6000/frecuencia_ruido
+    b, a = signal.butter(1, [wn1,wn2], 'bandpass')  #PASO DE BANDA
+    filtedData = signal.filtfilt(b, a, data) 
+    wavfile.write('ruidoFiltrado.wav',frecuencia_ruido,filtedData.astype(np.int16))
+    frecuencia_ruido, filtedData = wavfile.read('./audioFiltrado.wav')
+    return frecuencia_ruido, filtedData
+
+
 if __name__ == '__main__':
     audio0, frecuencia_muestreo0=leer_audio("audio Hector.wav")
     audio1, frecuencia_muestreo1=leer_audio("audio Maximiliano.wav")
@@ -83,11 +93,9 @@ if __name__ == '__main__':
     #analizar(audio2,frecuencia_muestreo2)
 
     audioRosa, frecuencia_ruido=leer_audio("Ruido Rosa.wav")
-    audio1 = signal.resample(audio1,len(audioRosa))
+    audioRosa = signal.resample(audio1,len(audio1))
     # Se suman las dos señales
     dataResult = audio1+audioRosa
-    print(dataResult)
     wavfile.write('audioRuidoso.wav',frecuencia_ruido,dataResult.astype(np.int16))
-    
-
+    frecuencia_filted, filtedData = ruidoFilted(frecuencia_ruido, dataResult)
 
