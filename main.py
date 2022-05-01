@@ -1,3 +1,9 @@
+import scipy.io.wavfile as waves
+import scipy.fft
+from scipy import signal
+from scipy.io import wavfile
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.fft
@@ -9,6 +15,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 # Función que permite leer un archivo de auido .wav
 def leer_audio(nombre_archivo):
     frecuencia_muestreo, data = waves.read(nombre_archivo)
+    print(data)
     try:
         vector_audio = data[:, 0]
     except IndexError:
@@ -63,51 +70,42 @@ def analizar(vector_audio, frecuencia_muestreo):
     plt.xlabel("Tiempo")
     plt.ylabel("Freceuncia")
     plt.show()
+ 
+
+def ruidoFilted(frecuencia_ruido, data):
+    wn1 = 2*100/frecuencia_ruido
+    wn2 = 2*5000/frecuencia_ruido
+    b, a = signal.butter(6, [wn1,wn2], 'bandpass')  #PASO DE BANDA
+    filtedData = signal.filtfilt(b, a, data) 
+    wavfile.write('ruidoFiltrado.wav',frecuencia_ruido,filtedData.astype(np.int16))
+    frecuencia_ruido, filtedData = wavfile.read('ruidoFiltrado.wav')
+    return frecuencia_ruido, filtedData
 
 
-def interpol(audio1, frecuencia_muestreo1, audio2, frecuencia_muestreo2):
-    time = np.arange(0, 1)
-    suma_audios = []
-    frecuencia_muestreo_sumado = 0
-    tiempo_interpolacion = []
-
+def addSignals(audio1, frecuencia_muestreo1, audio2, frecuencia_muestreo2):
     if len(audio2) >= len(audio1):
-        tiempo_interpolacion = np.arange(0, len(audio2)) / frecuencia_muestreo1
-        audio_interpolado = InterpolatedUnivariateSpline(tiempo_interpolacion, audio2)(tiempo_interpolacion)
-        for i in range(len(audio1)):
-            suma_audios.append(audio1[i] + audio_interpolado[i])
-        time = np.arange(0, len(audio1)) / frecuencia_muestreo1
+        audio_interpolado = signal.resample(audio2, len(audio1))
+        suma_audios = audio1 + audio_interpolado
         frecuencia_muestreo_sumado = frecuencia_muestreo1
     else:
-        tiempo_interpolacion = np.arange(0, len(audio1)) / frecuencia_muestreo2
-        audio_interpolado = InterpolatedUnivariateSpline(tiempo_interpolacion, audio1)(tiempo_interpolacion)
-        for i in range(len(audio2)):
-            suma_audios.append(audio1[i] + audio_interpolado[i])
-        time = np.arange(0, len(audio2)) / frecuencia_muestreo2
+        audio_interpolado=signal.resample(audio1,len(audio2))
+        suma_audios=audio_interpolado+audio2
         frecuencia_muestreo_sumado = frecuencia_muestreo2
-
     return suma_audios, frecuencia_muestreo_sumado, audio_interpolado
 
 
-def filtro(data, cutoff1, fs, order=5):
-    nyq = fs
-    normal_cutoff1 = cutoff1 / nyq
-    s= butter(order, normal_cutoff1, btype='highpass', analog=False,output='sos')
-    y = sosfilt(s,data)
-    return y
-
 
 if __name__ == '__main__':
-    audio1, frecuencia_muestreo1 = leer_audio("audio Maximiliano.wav")
-    audio2, frecuencia_muestreo2 = leer_audio("Ruido Azul.wav")
-    analizar(audio1, frecuencia_muestreo1)
-    analizar(audio2, frecuencia_muestreo2)
-    audio_conjunto, frecuencia_muestreo_conjunto, audio_interpolado = interpol(audio1, frecuencia_muestreo1, audio2,
-                                                                               frecuencia_muestreo2)
 
-    analizar(audio_conjunto,frecuencia_muestreo_conjunto)
-    FFT_filtrado=filtro(transformada_fourier(audio_conjunto),1000,frecuencia_muestreo_conjunto,10)
-    analizar(transformada_inversa_fourier(FFT_filtrado),frecuencia_muestreo_conjunto)
-
-
+    audio0, frecuencia_muestreo0=leer_audio("audio Hector.wav")
+    audio1, frecuencia_muestreo1=leer_audio("audio Maximiliano.wav")
+    audio2, frecuencia_muestreo2=leer_audio("Ruido Azul.wav")
+    analizar(audio0,frecuencia_muestreo0)
+    analizar(audio1,frecuencia_muestreo1)
+    analizar(audio2,frecuencia_muestreo2)
+    summed_signals, sample_frequency_summed_signals, interpolated_signal=addSignals(audio1, frecuencia_muestreo1, audio2, frecuencia_muestreo2)
+    analizar(summed_signals,sample_frequency_summed_signals)
+    wavfile.write('audioRuidoso.wav',sample_frequency_summed_signals,summed_signals.astype(np.int16))
+    frecuencia_filted, filtedData = ruidoFilted(sample_frequency_summed_signals, summed_signals)
+    analizar(filtedData,frecuencia_filted)
 
