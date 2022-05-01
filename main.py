@@ -73,9 +73,11 @@ def analizar(vector_audio,frecuencia_muestreo):
 
 
 if __name__ == '__main__':
+    audio0, frecuencia_muestreo0=leer_audio("audio Hector.wav")
     audio1,frecuencia_muestreo1=leer_audio("audio Maximiliano.wav")
     audio2,frecuencia_muestreo2=leer_audio("Ruido Azul.wav")
 
+    analizar(audio0,frecuencia_muestreo0)
     analizar(audio1,frecuencia_muestreo1)
     analizar(audio2,frecuencia_muestreo2)
 
