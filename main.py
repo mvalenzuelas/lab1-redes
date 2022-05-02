@@ -86,7 +86,7 @@ def analyze(vector_audio, sample_frequency):
     plt.show()
 
 
-def signal_filter(noise_frequency, data, a, b, n):
+def signal_filter(noise_frequency, data, f1, f2, n):
     """
      Function that allows filtering a noisy audio signal with a specific sample rate using
      butterworth of the bandpass type
@@ -97,8 +97,8 @@ def signal_filter(noise_frequency, data, a, b, n):
      :param n: Filter order
      :return:
      """
-    wn1 = 2 * a / noise_frequency
-    wn2 = 2 * b / noise_frequency
+    wn1 = 2 * f1 / noise_frequency
+    wn2 = 2 * f2 / noise_frequency
     b, a = signal.butter(n, [wn1, wn2], 'bandpass')  # PASO DE BANDA
     filter_data = signal.filtfilt(b, a, data)
     return filter_data
@@ -111,7 +111,7 @@ def compare_filters(signal_to_filter, frequency):
      :param signal_to_filter: numeric vector representing the amplitude of the noisy audio signal over time
      :param frequency: numeric value that represents the sampling frequency
      """
-    filter1 = fourier_transform(signal_filter(frequency, signal_to_filter, 100, 5000, 6))
+    filter1 = fourier_transform(signal_filter(frequency, signal_to_filter, 100, 1000, 1))
     filter2 = fourier_transform(signal_filter(frequency, signal_to_filter, 100, 5000, 3))
     filter3 = fourier_transform(signal_filter(frequency, signal_to_filter, 500, 6000, 1))
     filter4 = fourier_transform(signal_filter(frequency, signal_to_filter, 1000, 12000, 1))
@@ -123,7 +123,7 @@ def compare_filters(signal_to_filter, frequency):
     len_signal = len(signal_to_filter)
     frequency_array = np.arange(-len_signal // 2, len_signal // 2) * (frequency / len_signal)
     plt.plot(frequency_array, filter1.real)
-    plt.title("Transformada de Fourier para filtro con parametros w1=100 w2=5000 n=6")
+    plt.title("Transformada de Fourier para filtro con parametros w1=100 w2=1000 n=1")
     plt.ylabel("Amplitud de la transformada de fourier")
     plt.xlabel("Frecuencia")
 
@@ -180,7 +180,7 @@ def add_signals(signal1, sm_signal1, signal2, sm_signal2):
         sample_frequency_add_audios = sm_signal2
     return add_audios, sample_frequency_add_audios
 
-def menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals):
+def menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals,filter_signal):
     print("Laboratorio 1: ")
     print()
     print("1- Gráficas de la señal de audio de Maximiliano Valenzuela")
@@ -188,7 +188,8 @@ def menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, s
     print("3- Graficas de la señal de audio ruido azul")
     print("4- Graficas de la señal de audio ruidosa")
     print("5- Comparación de filtros")
-    print("6- Salir del programa")
+    print("6- Graficas de la señal de audio filtrada")
+    print("7- Salir del programa")
     print()
     while True:
         option = int(input("Ingrese una opción: "))
@@ -206,9 +207,12 @@ def menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, s
                     # Graph a comparison of the Fourier transforms obtained of applying different filters to the summed signal
             compare_filters(summed_signals, sample_frequency_summed_signals)
         elif (option == 6):
+            analyze(filter_signal,sample_frequency_summed_signals)
+        elif (option ==7):
             break
         else:
             print("Ingrese una opcion valida: ")
+
 
 if __name__ == '__main__':
     # Reed the audio signals with the name and rut of the student
@@ -225,9 +229,9 @@ if __name__ == '__main__':
     wavfile.write('audioRuidoso.wav', sample_frequency_summed_signals, summed_signals.astype(np.int16))
 
     # Apply a filter to the summed signal and graph the properties of the signal generated
-    filter_signal = signal_filter(sample_frequency_summed_signals, summed_signals, 100, 5000, 6)
+    filter_signal = signal_filter(sample_frequency_summed_signals, summed_signals, 100, 1000, 1)
 
     # Write in a .wav file the filtered signal
     wavfile.write('ruidoFiltrado.wav', sample_frequency_summed_signals, filter_signal.astype(np.int16))
 
-    menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals)
+    menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals,filter_signal)
