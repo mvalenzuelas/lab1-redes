@@ -180,6 +180,35 @@ def add_signals(signal1, sm_signal1, signal2, sm_signal2):
         sample_frequency_add_audios = sm_signal2
     return add_audios, sample_frequency_add_audios
 
+def menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals):
+    print("Laboratorio 1: ")
+    print()
+    print("1- Gráficas de la señal de audio de Maximiliano Valenzuela")
+    print("2- Gráficas de la señal de audio de Héctor Ballesteros")
+    print("3- Graficas de la señal de audio ruido azul")
+    print("4- Graficas de la señal de audio ruidosa")
+    print("5- Comparación de filtros")
+    print("6- Salir del programa")
+    print()
+    while True:
+        option = int(input("Ingrese una opción: "))
+        if (option == 1):
+                    # Graph the audio signals, showing their amplitude, Fourier transform, inverse Fourier transform and Spectrogram
+            analyze(audio0, sample_frequency0)
+        elif (option == 2):
+            analyze(audio1, sample_frequency1)
+        elif (option == 3):
+            analyze(audio2, sample_frequency2)
+        elif (option == 4):
+                    # Graph the properties of se summed signal
+            analyze(summed_signals, sample_frequency_summed_signals)
+        elif (option == 5):
+                    # Graph a comparison of the Fourier transforms obtained of applying different filters to the summed signal
+            compare_filters(summed_signals, sample_frequency_summed_signals)
+        elif (option == 6):
+            break
+        else:
+            print("Ingrese una opcion valida: ")
 
 if __name__ == '__main__':
     # Reed the audio signals with the name and rut of the student
@@ -189,26 +218,16 @@ if __name__ == '__main__':
     # Reed the noise audio signal
     audio2, sample_frequency2 = reed_audio("Ruido Azul.wav")
 
-    # Graph the audio signals, showing their amplitude, Fourier transform, inverse Fourier transform and Spectrogram
-    analyze(audio0, sample_frequency0)
-    analyze(audio1, sample_frequency1)
-    analyze(audio2, sample_frequency2)
-
     # Choose the second audio signal and add the noise signal
     summed_signals, sample_frequency_summed_signals = add_signals(audio1, sample_frequency1, audio2, sample_frequency2)
-
-    # Graph the properties of se summed signal
-    analyze(summed_signals, sample_frequency_summed_signals)
 
     # Write in a .wav file the summed signal
     wavfile.write('audioRuidoso.wav', sample_frequency_summed_signals, summed_signals.astype(np.int16))
 
     # Apply a filter to the summed signal and graph the properties of the signal generated
     filter_signal = signal_filter(sample_frequency_summed_signals, summed_signals, 100, 5000, 6)
-    analyze(filter_signal, sample_frequency_summed_signals)
 
     # Write in a .wav file the filtered signal
     wavfile.write('ruidoFiltrado.wav', sample_frequency_summed_signals, filter_signal.astype(np.int16))
 
-    # Graph a comparison of the Fourier transforms obtained of applying different filters to the summed signal
-    compare_filters(summed_signals, sample_frequency_summed_signals)
+    menu(audio0, sample_frequency0, audio1, sample_frequency1, summed_signals, sample_frequency_summed_signals)
