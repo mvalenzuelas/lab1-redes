@@ -58,7 +58,7 @@ def analyze(vector_audio, sample_frequency):
     plt.subplot(2, 2, 1)
     time = np.arange(0, len_vector_audio) / sample_frequency
     plt.plot(time, vector_audio)
-    plt.title("Amplitud del vector del audio grabado en el tiempo")
+    plt.title("Amplitud del vector en el tiempo")
     plt.xlabel("Tiempo [s]")
     plt.ylabel("Amplitud")
 
@@ -66,7 +66,7 @@ def analyze(vector_audio, sample_frequency):
     frequencies = np.arange(-len_vector_audio // 2, len_vector_audio // 2) * (sample_frequency / len_vector_audio)
     plt.subplot(2, 2, 2)
     plt.plot(frequencies, trans_vector.real)
-    plt.title("Transformada de Fourier del audio grabado F(\u03C9)")
+    plt.title("Transformada de Fourier F(\u03C9)")
     plt.ylabel("Amplitud de la transformada de fourier")
     plt.xlabel("Frecuencia")
     plt.legend(("Reales", "Imaginarios"))
@@ -80,7 +80,7 @@ def analyze(vector_audio, sample_frequency):
 
     plt.subplot(2, 2, 4)
     plt.specgram(vector_audio, Fs=sample_frequency, NFFT=649)
-    plt.title("Espectrograma del audio grabado")
+    plt.title("Espectrograma de la señal")
     plt.xlabel("Tiempo")
     plt.ylabel("Frecuencia")
     plt.show()
@@ -182,16 +182,33 @@ def add_signals(signal1, sm_signal1, signal2, sm_signal2):
 
 
 if __name__ == '__main__':
+    # Reed the audio signals with the name and rut of the student
     audio0, sample_frequency0 = reed_audio("audio Hector.wav")
     audio1, sample_frequency1 = reed_audio("audio Maximiliano.wav")
+
+    # Reed the noise audio signal
     audio2, sample_frequency2 = reed_audio("Ruido Azul.wav")
+
+    # Graph the audio signals, showing their amplitude, Fourier transform, inverse Fourier transform and Spectrogram
     analyze(audio0, sample_frequency0)
     analyze(audio1, sample_frequency1)
     analyze(audio2, sample_frequency2)
+
+    # Choose the second audio signal and add the noise signal
     summed_signals, sample_frequency_summed_signals = add_signals(audio1, sample_frequency1, audio2, sample_frequency2)
+
+    # Graph the properties of se summed signal
     analyze(summed_signals, sample_frequency_summed_signals)
+
+    # Write in a .wav file the summed signal
     wavfile.write('audioRuidoso.wav', sample_frequency_summed_signals, summed_signals.astype(np.int16))
+
+    # Apply a filter to the summed signal and graph the properties of the signal generated
     filter_signal = signal_filter(sample_frequency_summed_signals, summed_signals, 100, 5000, 6)
     analyze(filter_signal, sample_frequency_summed_signals)
+
+    # Write in a .wav file the filtered signal
     wavfile.write('ruidoFiltrado.wav', sample_frequency_summed_signals, filter_signal.astype(np.int16))
+
+    # Graph a comparison of the Fourier transforms obtained of applying different filters to the summed signal
     compare_filters(summed_signals, sample_frequency_summed_signals)
